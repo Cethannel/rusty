@@ -1,4 +1,4 @@
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Token {
     IDENT(String),
     INT(String),
@@ -45,5 +45,41 @@ impl Token {
             "return" => RETURN,
             _ => Token::IDENT(input),
         }
+    }
+
+    pub fn literal(&self) -> String {
+        use Token::*;
+        match self {
+            IDENT(ident) => &ident,
+            INT(ident) => &ident,
+            ASSIGN => "=",
+            PLUS => "+",
+            BANG => "!",
+            MINUS => "-",
+            SLASH => "/",
+            LT => "<",
+            GT => ">",
+            ASTERISK => "*",
+
+            EQ => "==",
+            NOT_EQ => "!=",
+
+            COMMA => ",",
+            SEMICOLON => ";",
+
+            LPAREN => "(",
+            RPAREN => ")",
+            LBRACE => "{",
+            RBRACE => "}",
+
+            FUNCTION => "fn",
+            LET => "let",
+            IF => "if",
+            ELSE => "else",
+            RETURN => "return",
+            TRUE => "true",
+            FALSE => "false",
+        }
+        .to_string()
     }
 }
