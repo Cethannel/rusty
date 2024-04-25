@@ -7,9 +7,9 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(input: &str) -> Self {
+    pub fn new(input: String) -> Self {
         let mut out = Self {
-            input: input.to_string(),
+            input: input,
             cur_token: None,
             peek_token: None,
         };
@@ -28,6 +28,10 @@ impl Lexer {
         }
     }
 
+    fn peek_char(&self) -> Option<char> {
+        self.peek_token
+    }
+
     pub fn next_token(&mut self) -> Result<Token, LexerError> {
         use Token::*;
 
@@ -38,10 +42,30 @@ impl Lexer {
         }
 
         let out = match self.cur_token.ok_or(LexerError::EOF)? {
-            '=' => ASSIGN,
+            '=' => {
+                if self.peek_char() == Some('=') {
+                    self.advance();
+                    EQ
+                } else {
+                    ASSIGN
+                }
+            }
+            '!' => {
+                if self.peek_char() == Some('=') {
+                    self.advance();
+                    NOT_EQ
+                } else {
+                    BANG
+                }
+            }
+            '-' => MINUS,
+            '/' => SLASH,
             '+' => PLUS,
+            '*' => ASTERISK,
             ',' => COMMA,
             ';' => SEMICOLON,
+            '<' => LT,
+            '>' => GT,
             '(' => LPAREN,
             ')' => RPAREN,
             '{' => LBRACE,
@@ -110,7 +134,17 @@ mod test {
         };
 
         let result = add(five, ten);
-        "#;
+        !-/*5;
+        5 < 10 > 5;
+
+        10 == 10;
+        10 != 9;
+
+        if (5 < 10) {
+            return true;
+        } else {
+            return false;
+        }"#;
 
         let expected = [
             Ok(Token::LET),
@@ -149,15 +183,50 @@ mod test {
             Ok(Token::IDENT("ten".to_string())),
             Ok(Token::RPAREN),
             Ok(Token::SEMICOLON),
+            Ok(Token::BANG),
+            Ok(Token::MINUS),
+            Ok(Token::SLASH),
+            Ok(Token::ASTERISK),
+            Ok(Token::INT("5".to_string())),
+            Ok(Token::SEMICOLON),
+            Ok(Token::INT("5".to_string())),
+            Ok(Token::LT),
+            Ok(Token::INT("10".to_string())),
+            Ok(Token::GT),
+            Ok(Token::INT("5".to_string())),
+            Ok(Token::SEMICOLON),
+            Ok(Token::INT("10".to_string())),
+            Ok(Token::EQ),
+            Ok(Token::INT("10".to_string())),
+            Ok(Token::SEMICOLON),
+            Ok(Token::INT("10".to_string())),
+            Ok(Token::NOT_EQ),
+            Ok(Token::INT("9".to_string())),
+            Ok(Token::SEMICOLON),
+            Ok(Token::IF),
+            Ok(Token::LPAREN),
+            Ok(Token::INT("5".to_string())),
+            Ok(Token::LT),
+            Ok(Token::INT("10".to_string())),
+            Ok(Token::RPAREN),
+            Ok(Token::LBRACE),
+            Ok(Token::RETURN),
+            Ok(Token::TRUE),
+            Ok(Token::SEMICOLON),
+            Ok(Token::RBRACE),
+            Ok(Token::ELSE),
+            Ok(Token::LBRACE),
+            Ok(Token::RETURN),
+            Ok(Token::FALSE),
+            Ok(Token::SEMICOLON),
+            Ok(Token::RBRACE),
             Err(LexerError::EOF),
         ];
 
-        let mut lexer = Lexer::new(input);
+        let mut lexer = Lexer::new(input.to_string());
 
         for (i, tt) in expected.iter().enumerate() {
             let token = lexer.next_token();
-
-            println!("Got token: {:?}", token);
 
             if token != *tt {
                 println!("Failed: [{i}], expected: {:?}, got: {:?}", tt, token);

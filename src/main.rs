@@ -1,3 +1,7 @@
+mod repl;
+
+use repl::start;
+
 fn main() {
-    println!("Hello, world!");
+    start(std::io::stdin(), std::io::stdout())
 }

@@ -5,6 +5,15 @@ pub enum Token {
 
     ASSIGN,
     PLUS,
+    BANG,
+    MINUS,
+    SLASH,
+    LT,
+    GT,
+    ASTERISK,
+
+    EQ,
+    NOT_EQ,
 
     COMMA,
     SEMICOLON,
@@ -16,6 +25,11 @@ pub enum Token {
 
     FUNCTION,
     LET,
+    IF,
+    ELSE,
+    RETURN,
+    TRUE,
+    FALSE,
 }
 
 impl Token {
@@ -24,6 +38,11 @@ impl Token {
         match input.as_str() {
             "let" => LET,
             "fn" => FUNCTION,
+            "if" => IF,
+            "else" => ELSE,
+            "true" => TRUE,
+            "false" => FALSE,
+            "return" => RETURN,
             _ => Token::IDENT(input),
         }
     }
